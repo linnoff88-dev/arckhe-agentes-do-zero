@@ -1,0 +1,7 @@
+[ferramenta] lembrar {"fato": "Seu cachorro se chama Thor"} -> guardado: Seu cachorro se chama Thor
+Você tem um cachorro chamado Thor. Posso ajudar com algo mais relacionado a ele?
+(2 rodada(s))
+["Seu cachorro se chama Thor"]
+[ferramenta] ler_arquivo {"nome": "Thor"} -> recusado: [Errno 2] No such file or directory: '~/agente-do-zero/t
+Desculpe, não consegui encontrar o nome do seu cachorro no arquivo. Você pode me dizer o nome do seu cachorro, Thor?
+(2 rodada(s))

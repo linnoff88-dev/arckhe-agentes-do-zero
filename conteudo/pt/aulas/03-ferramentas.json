@@ -1,0 +1,201 @@
+{
+  "slug": "ferramentas",
+  "num": 3,
+  "menu": "Ferramentas",
+  "titulo": "Ferramentas: o agente para de só falar e age",
+  "titulo_curto": "Ferramentas",
+  "minutos": 15,
+  "lead": "Sozinho, o modelo só escreve texto. Com ferramentas, ele pede \"leia este arquivo\", o seu programa lê e devolve o conteúdo, e ele continua dali. Esse vai e volta é o loop, o coração de todo agente. Nesta aula ele cabe em menos de 20 linhas.",
+  "objetivo": "dar ao agente a ferramenta ler_arquivo e ver o loop pedir, executar e responder em duas rodadas.",
+  "competencias": [
+    "descrever-ferramenta",
+    "montar-loop-agente",
+    "ler-rodadas"
+  ],
+  "aprende": [
+    {
+      "t": "Descrever uma ferramenta para o modelo"
+    },
+    {
+      "t": "O loop: pedir, executar, devolver, repetir"
+    },
+    {
+      "t": "Por que o loop tem um número máximo de voltas"
+    }
+  ],
+  "hero_alt": "Mão robótica pegando uma ferramenta de uma parede de ferramentas organizada.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "O loop do agente",
+      "sub": "Clique em cada etapa. Ele repete até o modelo responder sem pedir ferramenta, ou até 5 voltas.",
+      "volta": "até 5 rodadas",
+      "nos": [
+        {
+          "icone": "chat",
+          "titulo": "Mensagens",
+          "sub": "Pedido + histórico",
+          "detalhe": "A lista de mensagens começa com o seu pedido e cresce a cada volta: o que o modelo disse e o que cada ferramenta devolveu."
+        },
+        {
+          "icone": "cerebro",
+          "titulo": "Modelo",
+          "sub": "Responde ou pede",
+          "detalhe": "O modelo recebe as mensagens e as descrições das ferramentas. Ou escreve a resposta final, ou devolve um pedido de ferramenta (no Ollama, o campo <code>tool_calls</code>): o nome da ferramenta e os argumentos."
+        },
+        {
+          "icone": "terminal",
+          "titulo": "Harness",
+          "sub": "Executa",
+          "forte": true,
+          "detalhe": "O seu código acha a função pelo nome, roda com os argumentos e imprime <code>[ferramenta] ler_arquivo {...}</code> para você ver o que aconteceu."
+        },
+        {
+          "icone": "arquivo",
+          "titulo": "Resultado",
+          "sub": "Volta ao modelo",
+          "detalhe": "O que a função devolveu entra na lista como uma mensagem de quem fala \"ferramenta\" (papel <code>tool</code>), e a próxima volta começa."
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "O agente.py da aula 3",
+      "sub": "Rode dentro de agente-do-zero/. O cp troca o agente.py pelo da aula 3.",
+      "blocos": [
+        {
+          "rot": "Arquivo · kit/aula3/agente.py",
+          "icone": "arquivo",
+          "conteudo": "#!/usr/bin/env python3\n\"\"\"Agente do zero (aula 3): o loop com ferramenta. O modelo pede, o código executa, o resultado volta.\"\"\"\nimport json, os, sys, urllib.request\n\nMODELO = os.environ.get(\"MODELO\", \"llama3.2\")\nURL = os.environ.get(\"OLLAMA_URL\", \"http://localhost:11434\") + \"/api/chat\"\nPASTA = os.path.realpath(\"trabalho\")\nMAX_RODADAS = 5\n\n\ndef cerebro(mensagens, ferramentas):\n    corpo = {\"model\": MODELO, \"messages\": mensagens, \"tools\": ferramentas, \"stream\": False, \"think\": False,\n             \"options\": {\"temperature\": 0, \"seed\": 1}}\n    pedido = urllib.request.Request(URL, json.dumps(corpo).encode(), {\"Content-Type\": \"application/json\"})\n    with urllib.request.urlopen(pedido, timeout=600) as r:\n        return json.loads(r.read())[\"message\"]\n\n\ndef ler_arquivo(nome):\n    with open(os.path.join(PASTA, nome)) as f:      # ainda sem trava: ela entra na aula 5\n        return f.read()\n\n\nFERRAMENTAS = {\"ler_arquivo\": ler_arquivo}\nDESCRICOES = [\n    {\"type\": \"function\", \"function\": {\"name\": \"ler_arquivo\", \"description\": \"Lê um arquivo da pasta de trabalho.\",\n     \"parameters\": {\"type\": \"object\", \"properties\": {\"nome\": {\"type\": \"string\"}}, \"required\": [\"nome\"]}}},\n]\n\n\ndef responder(pedido, mostrar=print):\n    mensagens = [{\"role\": \"user\", \"content\": pedido}]\n    for rodada in range(MAX_RODADAS):\n        msg = cerebro(mensagens, DESCRICOES)\n        mensagens.append(msg)\n        if not msg.get(\"tool_calls\"):\n            return msg.get(\"content\", \"\"), rodada + 1\n        for chamada in msg[\"tool_calls\"]:\n            nome, args = chamada[\"function\"][\"name\"], chamada[\"function\"].get(\"arguments\") or {}\n            try:\n                saida = FERRAMENTAS[nome](**args)\n            except Exception as erro:\n                saida = f\"recusado: {erro}\"\n            mostrar(f\"[ferramenta] {nome} {json.dumps(args, ensure_ascii=False)} -> {saida[:80]}\")\n            mensagens.append({\"role\": \"tool\", \"content\": saida})\n    return \"Parei: cheguei ao limite de rodadas.\", MAX_RODADAS\n\n\nif __name__ == \"__main__\":\n    os.makedirs(PASTA, exist_ok=True)\n    resposta, rodadas = responder(\" \".join(sys.argv[1:]))\n    print(f\"{resposta}\\n({rodadas} rodada(s))\")"
+        },
+        {
+          "rot": "Terminal · a primeira ferramenta",
+          "icone": "terminal",
+          "conteudo": "cd ~/agente-do-zero\ncp ~/agentes-do-zero-v72/kit/aula3/agente.py .\necho \"Reunião com o fornecedor às 15h.\" > trabalho/notas.txt\npython3 agente.py \"leia notas.txt e diga a hora da reunião\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Saída capturada (14/11/2026)",
+            "html": "<pre>[ferramenta] ler_arquivo {\"nome\": \"notas.txt\"} -&gt; Reunião com o fornecedor às 15h.\n\nParece que o arquivo \"notas.txt\" foi lido com sucesso!\n\nAqui está o conteúdo do arquivo:\n\nReunião com o fornecedor às 15h.\nO que você gostaria de saber mais sobre a reunião?\n(2 rodada(s))</pre><p>Rodada 1: o modelo pediu <code>ler_arquivo</code>. Rodada 2: com o conteúdo na mão, respondeu. A resposta é falante, mas a hora está certa.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "passos",
+      "titulo": "As três partes novas",
+      "sub": "Clique em cada uma.",
+      "passos": [
+        {
+          "titulo": "A função",
+          "sub": "ler_arquivo()",
+          "texto": [
+            "Uma função Python comum, que abre o arquivo dentro de <code>trabalho/</code> e devolve o texto.",
+            "Ainda sem trava: um pedido esperto consegue sair da pasta. Você vai ver isso acontecer e fechar o furo na aula 5."
+          ]
+        },
+        {
+          "titulo": "A descrição",
+          "sub": "DESCRICOES",
+          "texto": [
+            "O modelo não lê o seu código. Ele lê o nome, a descrição e os parâmetros que você escreve aqui.",
+            "Descrição clara é o que faz o modelo escolher a ferramenta certa. Ferramenta demais confunde."
+          ]
+        },
+        {
+          "titulo": "O loop",
+          "sub": "responder()",
+          "texto": [
+            "Chama o modelo; se ele pediu ferramenta, executa, guarda o resultado e volta. Se não pediu, essa é a resposta final.",
+            "<code>MAX_RODADAS = 5</code> garante que ele para, mesmo se o modelo insistir."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Prática: ver o loop rodar",
+      "sub": "Faça na ordem.",
+      "exercicios": [
+        {
+          "id": "e1",
+          "titulo": "E1 · A ferramenta em ação",
+          "min": "10 min",
+          "texto": "Rode o bloco do terminal com o agente.py da aula 3.",
+          "pronto": "a saída tem a linha <code>[ferramenta] ler_arquivo {\"nome\": \"notas.txt\"}</code> e termina com <code>(2 rodada(s))</code>."
+        },
+        {
+          "id": "e2",
+          "titulo": "E2 · Um arquivo seu",
+          "min": "10 min",
+          "texto": "Crie um arquivo seu em trabalho/ (uma lista, um lembrete) e faça uma pergunta que só dá para responder lendo ele.",
+          "pronto": "a linha <code>[ferramenta]</code> mostra o nome do seu arquivo e a resposta usa o que está nele."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Teste o que aprendeu",
+      "sub": "A explicação aparece depois da sua resposta.",
+      "perguntas": [
+        {
+          "p": "Como o modelo sabe que existe a ferramenta ler_arquivo?",
+          "opcoes": [
+            "A descrição em DESCRICOES, enviada em cada chamada.",
+            "Ele lê o código Python do agente.py antes de responder.",
+            "O Ollama lista para ele as funções do seu computador.",
+            "Ele adivinha pelas palavras do pedido."
+          ],
+          "certa": 0,
+          "explica": "O modelo só vê o que vai na mensagem: nome, descrição e parâmetros. O código da função nunca chega até ele.",
+          "ref": "passos"
+        },
+        {
+          "p": "Quando o loop termina?",
+          "opcoes": [
+            "Depois de exatamente duas rodadas, sempre, com ou sem ferramenta.",
+            "Quando a ferramenta devolve um texto longo demais.",
+            "Quando você aperta Enter de novo no terminal.",
+            "Ao responder sem pedir ferramenta, ou em 5 rodadas."
+          ],
+          "certa": 3,
+          "explica": "Sem pedido de ferramenta, é a resposta final. E o limite de 5 voltas é o freio para o modelo que insiste em pedir.",
+          "ref": "diagrama"
+        },
+        {
+          "p": "Na saída capturada, quantas vezes o modelo foi chamado?",
+          "opcoes": [
+            "Uma, porque só houve uma pergunta no terminal.",
+            "Duas: uma para pedir a ferramenta e outra para responder.",
+            "Três: uma para cada linha do arquivo notas.txt.",
+            "Nenhuma: o harness leu o arquivo e respondeu sozinho."
+          ],
+          "certa": 1,
+          "explica": "Cada rodada é uma chamada ao modelo. A primeira pediu ler_arquivo; a segunda, já com o conteúdo, respondeu.",
+          "ref": "codigo"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "Resumo da aula",
+      "itens": [
+        {
+          "t": "Ferramenta",
+          "texto": "Função Python + descrição que o modelo lê."
+        },
+        {
+          "t": "Loop",
+          "texto": "Pedir, executar, devolver, repetir, até 5 vezes."
+        },
+        {
+          "t": "Rodadas",
+          "texto": "Cada volta é uma chamada ao modelo: custo e tempo."
+        }
+      ]
+    }
+  ]
+}

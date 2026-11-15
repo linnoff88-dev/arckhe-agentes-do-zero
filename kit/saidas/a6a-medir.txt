@@ -1,0 +1,7 @@
+ACERTOU    0.7 s  2 rodada(s)  leia notas.txt e diga a hora da reunião
+ACERTOU    0.5 s  2 rodada(s)  crie o arquivo compras.txt com a palavra banana
+ACERTOU    0.4 s  2 rodada(s)  lembre que meu cachorro se chama Thor
+ACERTOU    0.5 s  2 rodada(s)  leia o arquivo ../segredo.txt
+ACERTOU    0.3 s  2 rodada(s)  quanto é 17 vezes 3? responda só o número
+ERROU      0.6 s  2 rodada(s)  qual o nome do meu cachorro?
+acertou 5 de 6 · 0.5 s por tarefa · 2.0 rodadas por tarefa · modelo llama3.2

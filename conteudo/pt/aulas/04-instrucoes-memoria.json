@@ -1,0 +1,174 @@
+{
+  "slug": "instrucoes-memoria",
+  "num": 4,
+  "menu": "Memória",
+  "titulo": "Instruções e memória: quem ele é e o que lembra de você",
+  "titulo_curto": "Instruções e memória",
+  "minutos": 15,
+  "lead": "Cada conversa começa do zero, a não ser que o harness entregue duas coisas antes do pedido: as instruções (quem o agente é e como age) e a memória (o que ele já sabe de você). As duas ficam em arquivos de texto que você abre e edita.",
+  "objetivo": "pôr as instruções em instrucoes.md e a memória em memoria.json, e ver um fato sobreviver de uma conversa para a outra.",
+  "competencias": [
+    "escrever-instrucoes",
+    "persistir-memoria",
+    "montar-contexto"
+  ],
+  "aprende": [
+    {
+      "t": "A mensagem de sistema: instruções que valem sempre"
+    },
+    {
+      "t": "Memória em arquivo, com a ferramenta lembrar"
+    },
+    {
+      "t": "Por que guardar não é o mesmo que usar"
+    }
+  ],
+  "hero_alt": "Caderno aberto ao lado de uma caixa de fichas, com uma mão robótica guardando uma ficha.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "O que vai na conversa antes do seu pedido",
+      "sub": "Clique em cada peça.",
+      "nos": [
+        {
+          "icone": "texto",
+          "titulo": "Instruções",
+          "sub": "instrucoes.md",
+          "detalhe": "Quem o agente é, em que língua responde, quando usar cada ferramenta e o que fazer quando algo é recusado. Mudou o arquivo, mudou o agente, sem mexer no código."
+        },
+        {
+          "icone": "memoria",
+          "titulo": "Memória",
+          "sub": "memoria.json",
+          "detalhe": "Uma lista de fatos sobre você. O harness lê o arquivo a cada pedido e cola os fatos na mensagem de sistema, depois de \"O que você sabe do dono\"."
+        },
+        {
+          "icone": "terminal",
+          "titulo": "Contexto",
+          "sub": "Mensagem de sistema",
+          "forte": true,
+          "detalhe": "Cada mensagem tem um papel: <code>system</code> (as regras, que o modelo trata como instrução de fundo), <code>user</code> (você) e <code>assistant</code> (o modelo). Instruções + memória viram a primeira mensagem, de papel <code>system</code>. Depois vem o seu pedido. É tudo o que o modelo sabe naquela conversa."
+        },
+        {
+          "icone": "caneta",
+          "titulo": "lembrar",
+          "sub": "Nova ferramenta",
+          "detalhe": "Quando você diz \"lembre que...\", o modelo chama <code>lembrar</code> e o harness acrescenta o fato ao memoria.json. Na próxima conversa, o fato já está no contexto."
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "Os arquivos da aula 4",
+      "sub": "Rode dentro de agente-do-zero/. O cp traz o agente.py da aula 4 e o instrucoes.md.",
+      "blocos": [
+        {
+          "rot": "Arquivo · kit/instrucoes.md",
+          "icone": "arquivo",
+          "conteudo": "Você é o assistente pessoal do dono. Responda em português, em no máximo 3 frases.\nUse as ferramentas quando o pedido for sobre arquivos ou sobre algo para guardar.\nQuando o dono disser \"lembre que...\", chame a ferramenta lembrar com o fato.\nSe uma ferramenta responder \"recusado\", diga ao dono o motivo e não tente de outro jeito.\nNunca invente o conteúdo de um arquivo: leia antes de responder."
+        },
+        {
+          "rot": "Arquivo · kit/aula4/agente.py",
+          "icone": "arquivo",
+          "conteudo": "#!/usr/bin/env python3\n\"\"\"Agente do zero (aula 4): + instruções num arquivo e memória que fica entre uma conversa e outra.\"\"\"\nimport json, os, sys, urllib.request\n\nMODELO = os.environ.get(\"MODELO\", \"llama3.2\")\nURL = os.environ.get(\"OLLAMA_URL\", \"http://localhost:11434\") + \"/api/chat\"\nPASTA = os.path.realpath(\"trabalho\")\nMEMORIA = \"memoria.json\"\nMAX_RODADAS = 5\n\n\ndef cerebro(mensagens, ferramentas):\n    corpo = {\"model\": MODELO, \"messages\": mensagens, \"tools\": ferramentas, \"stream\": False, \"think\": False,\n             \"options\": {\"temperature\": 0, \"seed\": 1}}\n    pedido = urllib.request.Request(URL, json.dumps(corpo).encode(), {\"Content-Type\": \"application/json\"})\n    with urllib.request.urlopen(pedido, timeout=600) as r:\n        return json.loads(r.read())[\"message\"]\n\n\ndef memorias():\n    return json.load(open(MEMORIA)) if os.path.exists(MEMORIA) else []\n\n\ndef ler_arquivo(nome):\n    with open(os.path.join(PASTA, nome)) as f:      # ainda sem trava: ela entra na aula 5\n        return f.read()\n\n\ndef lembrar(fato):\n    json.dump(memorias() + [fato], open(MEMORIA, \"w\"), ensure_ascii=False)\n    return f\"guardado: {fato}\"\n\n\nFERRAMENTAS = {\"ler_arquivo\": ler_arquivo, \"lembrar\": lembrar}\nDESCRICOES = [\n    {\"type\": \"function\", \"function\": {\"name\": \"ler_arquivo\", \"description\": \"Lê um arquivo da pasta de trabalho.\",\n     \"parameters\": {\"type\": \"object\", \"properties\": {\"nome\": {\"type\": \"string\"}}, \"required\": [\"nome\"]}}},\n    {\"type\": \"function\", \"function\": {\"name\": \"lembrar\", \"description\": \"Guarda um fato sobre o dono para sempre.\",\n     \"parameters\": {\"type\": \"object\", \"properties\": {\"fato\": {\"type\": \"string\"}}, \"required\": [\"fato\"]}}},\n]\n\n\ndef responder(pedido, mostrar=print):\n    instrucoes = open(\"instrucoes.md\").read()\n    lembrancas = \"\\n\".join(f\"- {m}\" for m in memorias()) or \"(nada ainda)\"\n    mensagens = [{\"role\": \"system\", \"content\": f\"{instrucoes}\\n\\nO que você sabe do dono:\\n{lembrancas}\"},\n                 {\"role\": \"user\", \"content\": pedido}]\n    for rodada in range(MAX_RODADAS):\n        msg = cerebro(mensagens, DESCRICOES)\n        mensagens.append(msg)\n        if not msg.get(\"tool_calls\"):\n            return msg.get(\"content\", \"\"), rodada + 1\n        for chamada in msg[\"tool_calls\"]:\n            nome, args = chamada[\"function\"][\"name\"], chamada[\"function\"].get(\"arguments\") or {}\n            try:\n                saida = FERRAMENTAS[nome](**args)\n            except Exception as erro:\n                saida = f\"recusado: {erro}\"\n            mostrar(f\"[ferramenta] {nome} {json.dumps(args, ensure_ascii=False)} -> {saida[:80]}\")\n            mensagens.append({\"role\": \"tool\", \"content\": saida})\n    return \"Parei: cheguei ao limite de rodadas.\", MAX_RODADAS\n\n\nif __name__ == \"__main__\":\n    os.makedirs(PASTA, exist_ok=True)\n    resposta, rodadas = responder(\" \".join(sys.argv[1:]))\n    print(f\"{resposta}\\n({rodadas} rodada(s))\")"
+        },
+        {
+          "rot": "Terminal · guardar e perguntar depois",
+          "icone": "terminal",
+          "conteudo": "cd ~/agente-do-zero\ncp ~/agentes-do-zero-v72/kit/aula4/agente.py ~/agentes-do-zero-v72/kit/instrucoes.md .\npython3 agente.py \"lembre que meu cachorro se chama Thor\"\ncat memoria.json; echo\npython3 agente.py \"qual o nome do meu cachorro?\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Saída capturada (14/11/2026)",
+            "html": "<pre>[ferramenta] lembrar {\"fato\": \"Seu cachorro se chama Thor\"} -&gt; guardado: Seu cachorro se chama Thor\nVocê tem um cachorro chamado Thor. Posso ajudar com algo mais relacionado a ele?\n(2 rodada(s))\n[\"Seu cachorro se chama Thor\"]\n[ferramenta] ler_arquivo {\"nome\": \"Thor\"} -&gt; recusado: [Errno 2] No such file or directory: '~/agente-do-zero/t\nDesculpe, não consegui encontrar o nome do seu cachorro no arquivo. Você pode me dizer o nome do seu cachorro, Thor?\n(2 rodada(s))</pre><p>O fato foi guardado (está no memoria.json) e foi entregue ao modelo na segunda conversa. Mesmo assim o llama3.2 foi procurar um arquivo chamado \"Thor\" e disse que não achou. Guardar funcionou; usar, não. Você vai medir isso na aula 6 e tentar consertar na aula 7.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Prática: o agente com a sua cara",
+      "sub": "Faça na ordem.",
+      "exercicios": [
+        {
+          "id": "e1",
+          "titulo": "E1 · Um fato que fica",
+          "min": "10 min",
+          "texto": "Diga ao agente um fato seu (\"lembre que meu time é o Grêmio\") e abra o memoria.json.",
+          "pronto": "o memoria.json tem o seu fato e continua lá depois de fechar e abrir o terminal."
+        },
+        {
+          "id": "e2",
+          "titulo": "E2 · Mude o jeito dele",
+          "min": "10 min",
+          "texto": "Edite a primeira linha do instrucoes.md com <code>nano instrucoes.md</code> (por exemplo, \"responda em uma frase só\") e repita <code>python3 agente.py \"leia notas.txt e diga a hora da reunião\"</code>.",
+          "pronto": "a resposta mudou de forma (mais curta, por exemplo) sem você alterar o agente.py. Se o modelo pequeno não obedecer de primeira, tudo bem: é isso que a aula 6 vai medir."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Teste o que aprendeu",
+      "sub": "A explicação aparece depois da sua resposta.",
+      "perguntas": [
+        {
+          "p": "Onde ficam as instruções do agente nesta versão?",
+          "opcoes": [
+            "Escritas dentro do agente.py, numa variável de texto.",
+            "No servidor do Ollama, junto do modelo.",
+            "No memoria.json, junto dos fatos sobre você.",
+            "No instrucoes.md, lido a cada pedido."
+          ],
+          "certa": 3,
+          "explica": "Instruções num arquivo de texto separado mudam o comportamento sem mexer no código. Você edita e a próxima conversa já usa.",
+          "ref": "diagrama"
+        },
+        {
+          "p": "Na saída capturada, o que deu errado na segunda conversa?",
+          "opcoes": [
+            "O fato não foi gravado no memoria.json e se perdeu entre as conversas.",
+            "O fato chegou ao modelo, que buscou um arquivo em vez de usar.",
+            "O Ollama apagou a memória do modelo entre uma conversa e outra.",
+            "O agente.py não leu o instrucoes.md na segunda conversa."
+          ],
+          "certa": 1,
+          "explica": "O memoria.json tinha o fato e o harness entregou ao modelo. O modelo pequeno é que preferiu procurar um arquivo. Problema de comportamento, que a medição pega.",
+          "ref": "codigo"
+        },
+        {
+          "p": "Por que a memória fica num arquivo e não só na conversa?",
+          "opcoes": [
+            "Porque arquivo é mais rápido que a memória RAM do computador.",
+            "Porque o modelo não aceita listas dentro da conversa.",
+            "Porque cada execução começa do zero e o arquivo fica.",
+            "Porque o Ollama exige um arquivo JSON para cada usuário."
+          ],
+          "certa": 2,
+          "explica": "O programa termina a cada pedido. O que não estiver em arquivo some. O harness lê o arquivo e devolve os fatos ao modelo a cada vez.",
+          "ref": "diagrama"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "Resumo da aula",
+      "itens": [
+        {
+          "t": "Instruções",
+          "texto": "instrucoes.md: quem ele é e como age."
+        },
+        {
+          "t": "Memória",
+          "texto": "memoria.json + ferramenta lembrar."
+        },
+        {
+          "t": "Guardar ≠ usar",
+          "texto": "O fato chegou ao modelo e ele não usou. Medir mostra."
+        }
+      ]
+    }
+  ]
+}

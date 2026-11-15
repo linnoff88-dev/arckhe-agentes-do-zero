@@ -1,0 +1,279 @@
+{
+  "slug": "objetivo",
+  "num": 1,
+  "menu": "Objetivo",
+  "titulo": "O que é um agente, e o objetivo do seu",
+  "titulo_curto": "Objetivo",
+  "minutos": 12,
+  "lead": "Agente não é mágica: é um modelo de IA dentro de um programa que deixa ele usar ferramentas, em voltas, até terminar. É a peça de todo sistema de agentes. Antes de escrever uma linha, você prepara o computador e decide o que o seu agente faz, o que não faz e como vai saber que ficou pronto.",
+  "objetivo": "instalar o Ollama com o llama3.2 e escrever o objetivo.md com o que o agente faz, não faz e quando está pronto.",
+  "competencias": [
+    "entender-anatomia-agente",
+    "definir-objetivo",
+    "instalar-modelo-local"
+  ],
+  "aprende": [
+    {
+      "t": "As quatro peças de todo agente"
+    },
+    {
+      "t": "Os 10 passos que este curso segue"
+    },
+    {
+      "t": "Escrever um objetivo que dá para conferir"
+    },
+    {
+      "t": "Rodar um modelo de IA grátis no seu computador"
+    }
+  ],
+  "hero_alt": "Pessoa de costas diante de uma parede com folhas e um mapa ligados por fios, planejando.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "As peças de um agente",
+      "sub": "Clique em cada peça. O resultado da ferramenta volta para o modelo até ele terminar.",
+      "volta": "o resultado volta ao modelo",
+      "nos": [
+        {
+          "icone": "usuario",
+          "titulo": "Você",
+          "sub": "Faz o pedido",
+          "detalhe": "Você pede uma coisa em português: \"leia notas.txt e diga a hora da reunião\". O agente trabalha para você e você confere."
+        },
+        {
+          "icone": "terminal",
+          "titulo": "Harness",
+          "sub": "O programa",
+          "forte": true,
+          "detalhe": "O harness é o programa em volta do modelo: monta a mensagem, chama o modelo, executa a ferramenta que ele pediu, devolve o resultado e repete. Neste curso ele é o seu agente.py."
+        },
+        {
+          "icone": "cerebro",
+          "titulo": "Modelo",
+          "sub": "Decide",
+          "detalhe": "O modelo (aqui o llama3.2, grátis, no seu computador) lê tudo e decide: responder ou pedir uma ferramenta. Ele só escreve texto; quem age é o harness."
+        },
+        {
+          "icone": "pasta",
+          "titulo": "Ferramentas",
+          "sub": "Agem",
+          "detalhe": "Ferramentas são funções Python que o harness roda quando o modelo pede: ler um arquivo, gravar um arquivo, guardar uma lembrança."
+        },
+        {
+          "icone": "check",
+          "titulo": "Resultado",
+          "sub": "Você confere",
+          "detalhe": "Quando o modelo responde sem pedir ferramenta, a volta acaba e a resposta chega a você. Na aula 6 você mede se ela está certa."
+        }
+      ]
+    },
+    {
+      "tipo": "passos",
+      "titulo": "Os 10 passos, em quatro blocos",
+      "sub": "Clique em cada bloco. Cada aula cobre um ou dois passos.",
+      "passos": [
+        {
+          "titulo": "Decidir",
+          "sub": "Passos 1 a 3",
+          "texto": [
+            "<b>1. Objetivo</b>: o que faz, o que não faz e quando está pronto (esta aula).",
+            "<b>2. Harness</b> e <b>3. Modelo</b>: primeiro o programa em volta, depois o modelo que cabe nele (aula 2). O harness vem antes porque ele limita quais modelos você pode usar."
+          ]
+        },
+        {
+          "titulo": "Construir",
+          "sub": "Passos 4 a 6",
+          "texto": [
+            "<b>4. Ferramentas</b>: o que o agente consegue fazer, não só falar (aula 3).",
+            "<b>5. Instruções</b> e <b>6. Memória</b>: quem ele é e o que lembra de você entre uma conversa e outra (aula 4)."
+          ]
+        },
+        {
+          "titulo": "Proteger",
+          "sub": "Passo 7",
+          "texto": [
+            "<b>7. Limites</b>: freio de rodadas, uma pasta só e o seu OK antes de mexer no que já existe (aula 5).",
+            "Sem limite, um agente com ferramenta é um programa que faz o que um texto mandar."
+          ]
+        },
+        {
+          "titulo": "Provar",
+          "sub": "Passos 8 a 10",
+          "texto": [
+            "<b>8. Testar</b> e <b>9. Medir</b>: tarefas fixas, nota, tempo e rodadas (aula 6).",
+            "<b>10. Iterar</b>: mudar uma coisa, medir de novo e só manter o que melhorou (aula 7)."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "passos",
+      "titulo": "Prepare o computador (uma vez só)",
+      "sub": "Clique no seu sistema. No fim, o bloco do terminal confere tudo.",
+      "passos": [
+        {
+          "titulo": "Windows",
+          "sub": "Use o WSL",
+          "texto": [
+            "Os comandos do curso são do terminal do Linux. No Windows, abra o PowerShell como administrador, rode <code>wsl --install</code>, reinicie e abra o aplicativo <b>Ubuntu</b>: é nele que você digita tudo.",
+            "Instale o Ollama dentro do Ubuntu com este comando: <code>curl -fsSL https://ollama.com/install.sh | sh</code> (ele pede a sua senha do Ubuntu). O <b>WSL</b> é o Linux que roda dentro do Windows."
+          ]
+        },
+        {
+          "titulo": "Mac",
+          "sub": "Terminal",
+          "texto": [
+            "Abra o aplicativo <b>Terminal</b>. O Python 3 e o Git costumam vir com as ferramentas de linha de comando: se pedir, aceite instalar.",
+            "Baixe o Ollama para Mac em ollama.com e abra uma vez."
+          ]
+        },
+        {
+          "titulo": "Linux",
+          "sub": "Terminal",
+          "texto": [
+            "Abra o terminal. Se faltar, instale com <code>sudo apt install python3 git</code> (Ubuntu e parecidos).",
+            "Instale o Ollama com o comando da página de download."
+          ]
+        },
+        {
+          "titulo": "Sem editor",
+          "sub": "O kit já tem tudo",
+          "texto": [
+            "Você não cria arquivo do zero: o primeiro comando baixa o kit do curso (com o <b>Git</b>, o programa que baixa e guarda versões de projetos) e, em cada aula, um <code>cp</code> copia o arquivo da aula para a sua pasta.",
+            "Se quiser colar à mão, use um editor de texto simples e salve com o nome exato (<code>agente.py</code>, não <code>agente.py.txt</code>)."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "O objetivo e o modelo no seu computador",
+      "sub": "Rode no terminal (no Windows, no Ubuntu do WSL). Os arquivos de todas as aulas estão no kit que o primeiro comando baixa.",
+      "blocos": [
+        {
+          "rot": "Arquivo · kit/objetivo.md",
+          "icone": "arquivo",
+          "conteudo": "# Objetivo do meu agente\nFaz: lê as minhas anotações da pasta trabalho/ e responde sobre elas; lembra o que eu pedir.\nNão faz: nada fora da pasta trabalho/; não substitui arquivo sem o meu OK.\nPronto quando: acerta pelo menos 5 das 6 tarefas do medir.py na minha máquina."
+        },
+        {
+          "rot": "Terminal · baixar o modelo e criar a pasta",
+          "icone": "terminal",
+          "conteudo": "python3 --version                    # precisa ser 3.10 ou mais novo\ncd ~ && [ -d agentes-do-zero-v72 ] || git clone -q https://github.com/inematds/agentes-do-zero-v72   # o kit (em outra pasta que a sua)\nmkdir -p ~/agente-do-zero/trabalho   # a pasta do seu agente\nollama list | grep -q \"^llama3.2\" || ollama pull llama3.2     # baixa só se ainda não tiver (2 GB)\nollama run llama3.2 \"Diga oi em cinco palavras.\" 2>/dev/null"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Saída capturada (14/11/2026)",
+            "html": "<pre>Python 3.12.3\nOlá, como você?</pre><p>A primeira linha confere o Python; a última é o modelo respondendo. Pedimos cinco palavras e ele deu três: o modelo nem sempre obedece, e é por isso que a aula 6 mede. Repare também: o kit fica em <code>~/agentes-do-zero-v72</code>, e o seu agente, em <code>~/agente-do-zero</code>, pastas diferentes.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "video",
+      "titulo": "O curso em vídeo",
+      "sub": "Em dois minutos e meio: a frase que fez o agente ler a senha, a trava que barrou, e os 10 passos do agente do zero.",
+      "chave": "agentes-do-zero"
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Prática: o ponto de partida",
+      "sub": "Só passe para a aula 2 quando os dois estiverem prontos.",
+      "exercicios": [
+        {
+          "id": "e1",
+          "titulo": "E1 · Computador pronto",
+          "min": "20 min",
+          "texto": "Prepare o computador pelo seu sistema e rode o bloco do terminal. O download do llama3.2 tem 2 GB.",
+          "pronto": "<code>python3 --version</code> mostra 3.10 ou mais novo, a pasta <code>agentes-do-zero-v72</code> existe e o modelo devolveu uma frase."
+        },
+        {
+          "id": "e2",
+          "titulo": "E2 · O seu objetivo",
+          "min": "10 min",
+          "texto": "Copie o modelo para a sua pasta (<code>cp ~/agentes-do-zero-v72/kit/objetivo.md ~/agente-do-zero/</code>), abra com <code>nano ~/agente-do-zero/objetivo.md</code> e troque pelas suas palavras. No nano: setas para andar, Ctrl+O e Enter para salvar, Ctrl+X para sair. Vale para todo arquivo que o curso mandar editar. Pode ser o mesmo agente do exemplo.",
+          "pronto": "o arquivo tem as três linhas, Faz, Não faz e Pronto quando, e a última cita um número que dá para medir."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Teste o que aprendeu",
+      "sub": "A explicação aparece depois da sua resposta.",
+      "perguntas": [
+        {
+          "p": "Quem executa a ferramenta, de fato, quando o agente lê um arquivo?",
+          "opcoes": [
+            "O modelo de IA, que abre o arquivo sozinho quando lê o pedido.",
+            "O harness: o modelo pede, o programa roda.",
+            "O Ollama, que tem acesso ao disco do computador inteiro.",
+            "Você, copiando o texto do arquivo para o chat."
+          ],
+          "certa": 1,
+          "explica": "O modelo só escreve texto, inclusive o pedido \"chame ler_arquivo\". Quem abre o arquivo é o seu programa. Por isso o harness é onde moram as travas.",
+          "ref": "diagrama"
+        },
+        {
+          "p": "Qual destas linhas é um bom \"pronto quando\"?",
+          "opcoes": [
+            "Quando o agente estiver bom o suficiente para usar no dia a dia.",
+            "Quando eu gostar das respostas que ele der.",
+            "Acerta 5 de 6 tarefas em menos de 2 s.",
+            "Quando ele parecer inteligente nas conversas."
+          ],
+          "certa": 2,
+          "explica": "Pronto quando tem número e dá para conferir sem opinião. \"Bom o suficiente\" muda conforme o seu humor.",
+          "ref": "codigo"
+        },
+        {
+          "p": "Por que escolher o harness antes do modelo?",
+          "opcoes": [
+            "Porque o harness limita os modelos que dá para usar.",
+            "Porque o modelo quase não importa para o resultado final.",
+            "Porque o harness é sempre a parte mais cara do projeto.",
+            "Porque o modelo só é escolhido no fim, depois dos testes."
+          ],
+          "certa": 0,
+          "explica": "O Claude Code e o Codex (agentes prontos de programação) só rodam os modelos das empresas deles; o seu agente.py roda o que o Ollama tiver. Primeiro onde roda, depois o melhor modelo que cabe ali.",
+          "ref": "passos"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "Resumo da aula",
+      "itens": [
+        {
+          "t": "Agente",
+          "texto": "Modelo + harness + ferramentas, em voltas até terminar."
+        },
+        {
+          "t": "Objetivo",
+          "texto": "Faz, não faz e pronto quando, com número."
+        },
+        {
+          "t": "Modelo local",
+          "texto": "Ollama + llama3.2: grátis e sem enviar nada para fora."
+        }
+      ]
+    },
+    {
+      "tipo": "links",
+      "titulo": "Para ir além",
+      "links": [
+        {
+          "t": "Ollama: baixar e instalar",
+          "href": "https://ollama.com/download",
+          "icone": "baixar"
+        },
+        {
+          "t": "Biblioteca de modelos do Ollama",
+          "href": "https://ollama.com/library",
+          "icone": "cerebro"
+        }
+      ]
+    }
+  ]
+}

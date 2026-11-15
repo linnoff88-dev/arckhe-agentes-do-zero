@@ -1,0 +1,258 @@
+{
+  "slug": "iterar",
+  "num": 7,
+  "menu": "Iterar",
+  "titulo": "Iterar: mude uma coisa, meça, e só mantenha o que melhorou",
+  "titulo_curto": "Iterar",
+  "minutos": 15,
+  "lead": "Agora o seu agente tem nota. Melhorar vira um ciclo curto: salvar o estado com o Git, mudar uma coisa só, medir de novo e manter ou desfazer. Nesta aula você repete o ciclo que fizemos com o erro do cachorro, com os números reais de cada tentativa.",
+  "objetivo": "fazer um ciclo completo de commit, mudança, medição e decisão, e saber o próximo passo com o INTELECTO v2.",
+  "competencias": [
+    "iterar-com-medicao",
+    "desfazer-com-git",
+    "comparar-modelos"
+  ],
+  "aprende": [
+    {
+      "t": "O ciclo: salvar, mudar, medir, decidir"
+    },
+    {
+      "t": "Por que uma mudança de cada vez"
+    },
+    {
+      "t": "O que fazer quando a mudança piora"
+    },
+    {
+      "t": "O próximo nível: o INTELECTO v2"
+    }
+  ],
+  "hero_alt": "Pessoa ajustando um braço robótico com versões anteriores de peças enfileiradas ao lado.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "O ciclo de melhoria",
+      "sub": "Clique em cada etapa. Ele recomeça a cada mudança.",
+      "volta": "de novo, com a próxima ideia",
+      "nos": [
+        {
+          "icone": "git",
+          "titulo": "Salvar",
+          "sub": "git commit",
+          "detalhe": "O <b>Git</b> guarda versões da sua pasta. Um <b>commit</b> é uma foto do estado de agora. Antes de mexer, um commit: assim qualquer mudança se desfaz com <code>git restore</code>, sem lembrar como era."
+        },
+        {
+          "icone": "caneta",
+          "titulo": "Mudar",
+          "sub": "Uma coisa só",
+          "detalhe": "Uma linha nas instruções, um ajuste no harness ou outro modelo. Se mudar duas coisas juntas, não sabe qual delas fez efeito."
+        },
+        {
+          "icone": "grafico",
+          "titulo": "Medir",
+          "sub": "python3 medir.py",
+          "forte": true,
+          "detalhe": "A mesma prova da aula 6. Compare acertos, tempo e rodadas com a medição anterior."
+        },
+        {
+          "icone": "check",
+          "titulo": "Decidir",
+          "sub": "Manter ou desfazer",
+          "detalhe": "Melhorou: commit. Ficou igual ou piorou: <code>git restore</code>. Sem número, a tentação é manter a mudança que você gostou."
+        }
+      ]
+    },
+    {
+      "tipo": "passos",
+      "titulo": "As três tentativas, medidas aqui",
+      "sub": "O erro: com o fato na memória, o llama3.2 chama ferramenta em vez de responder. Clique em cada tentativa.",
+      "passos": [
+        {
+          "titulo": "A · Instrução",
+          "sub": "Igual: desfaz",
+          "texto": [
+            "Acrescentamos ao instrucoes.md: \"Se a resposta já está em O que você sabe do dono, responda direto, sem ferramenta\".",
+            "Medido 3 vezes: 5 de 6 antes e 5 de 6 depois. O llama3.2 é um modelo pequeno (3 bilhões de <b>parâmetros</b>, os números que ele aprendeu no treino) e, com ferramenta disponível, tende a usar a ferramenta. Desfeito."
+          ]
+        },
+        {
+          "titulo": "B · Harness",
+          "sub": "Piorou: desfaz",
+          "texto": [
+            "Mudamos o harness para colar as memórias junto do pedido, em vez da mensagem de sistema.",
+            "Medido 2 vezes: 4 de 6. O cachorro continuou errado e a leitura do notas.txt passou a errar. Sem a medição, essa mudança parecia uma boa ideia. Desfeito."
+          ]
+        },
+        {
+          "titulo": "C · Modelo",
+          "sub": "Resolveu",
+          "texto": [
+            "Mesmo código, outro modelo pela variável. O <code>llama3.1:8b</code> (5 GB) ficou entre 4 e 5 de 6 em duas medições: não resolveu. O <code>qwen3.6:35b-a3b</code> acertou 6 de 6, a 0,8 s por tarefa.",
+            "O custo: o qwen tem 23 GB e precisa de uma placa de vídeo grande, por isso ele não está no bloco para copiar. Meça o maior modelo que a sua máquina roda."
+          ]
+        },
+        {
+          "titulo": "A decisão",
+          "sub": "É sua",
+          "texto": [
+            "Tarefas simples e máquina modesta: o llama3.2 acerta 5 de 6 em menos de 1 s. Precisa lembrar de você sem errar: modelo maior.",
+            "O ponto não é o qwen. É que agora você decide com número."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "O ciclo em comandos",
+      "sub": "Rode dentro de agente-do-zero/. As duas primeiras linhas só configuram o Git se ele nunca foi usado. A última linha usa o llama3.1:8b baixado na aula 2; troque por outro que você tenha (<code>ollama list</code>). Sem placa de vídeo, o bloco inteiro leva uns 30 min.",
+      "blocos": [
+        {
+          "rot": "Terminal · salvar, mudar, medir, desfazer e trocar o modelo",
+          "icone": "terminal",
+          "conteudo": "cd ~/agente-do-zero\ngit config --global user.name > /dev/null || git config --global user.name \"Seu Nome\"          # só na 1ª vez\ngit config --global user.email > /dev/null || git config --global user.email \"voce@exemplo.com\"\ngit init -q && git add . && git commit -qm \"antes da mudança\"\necho 'Se a resposta já está em \"O que você sabe do dono\", responda direto, sem ferramenta.' >> instrucoes.md\npython3 medir.py | tail -2\ngit restore instrucoes.md\nMODELO=llama3.1:8b python3 medir.py | tail -2     # o modelo baixado na aula 2"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Saída capturada (14/11/2026)",
+            "html": "<pre>ERROU      0.6 s  2 rodada(s)  qual o nome do meu cachorro?\nacertou 5 de 6 · 0.5 s por tarefa · 2.2 rodadas por tarefa · modelo llama3.2\nERROU      1.5 s  2 rodada(s)  qual o nome do meu cachorro?\nacertou 4 de 6 · 1.2 s por tarefa · 2.0 rodadas por tarefa · modelo llama3.1:8b</pre><p>Primeiro resumo: a mudança A não mexeu na nota, então foi desfeita. Segundo: o llama3.1:8b ficou em 4 de 6 nesta medição (em outra, 5 de 6). Nesta máquina, só o qwen3.6:35b-a3b (23 GB) acertou as seis. Num notebook comum, 5 de 6 com o llama3.2 pode ser a decisão certa: manter como está também é decidir com número.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Prática: o seu primeiro ciclo",
+      "sub": "Faça na ordem.",
+      "exercicios": [
+        {
+          "id": "e1",
+          "titulo": "E1 · Um ciclo completo",
+          "min": "20 min",
+          "texto": "Escolha uma mudança para melhorar a sua tarefa da aula 6 (instrução, ferramenta ou modelo), meça antes e depois e decida. Se nada melhorar, manter como está também vale: anote o porquê.",
+          "pronto": "o <code>git log</code> tem um commit e o objetivo.md tem as duas linhas \"acertou\", antes e depois, com a decisão ao lado."
+        },
+        {
+          "id": "e2",
+          "titulo": "E2 · O próximo nível",
+          "min": "15 min",
+          "texto": "Baixe o INTELECTO v2, que tem as mesmas peças e mais (Telegram, cofre, caixa sem internet), e rode a medição dele com o cérebro de teste.",
+          "pronto": "<code>python3 -m intelecto avaliar --provedor mock --modelo mock</code> mostra <code>acertou 7 de 8</code> (o cérebro de teste erra a conta de propósito)."
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "O próximo nível: INTELECTO v2",
+      "sub": "O mesmo desenho deste curso, completo: 8 peças, 113 testes e a medição com 8 tarefas.",
+      "blocos": [
+        {
+          "rot": "Terminal · baixar e medir o INTELECTO v2",
+          "icone": "terminal",
+          "conteudo": "cd ~ && git clone -q https://github.com/inematds/intelecto-v2 && cd intelecto-v2\npython3 -m intelecto avaliar --provedor mock --modelo mock"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Saída capturada (14/11/2026)",
+            "html": "<pre>Medindo mock/mock em 8 tarefas (cada uma numa pasta limpa; ninguém aprova nada)\n\n  ACERTOU memoria-guardar         0.1 s  2 rodada(s)\n  ACERTOU memoria-lembrar         0.1 s  4 rodada(s)\n  ACERTOU arquivo-ler             0.1 s  2 rodada(s)\n  ACERTOU arquivo-escrever        0.1 s  2 rodada(s)\n  ACERTOU comando-leitura         0.1 s  2 rodada(s)\n  ACERTOU trava-destrutivo        0.1 s  2 rodada(s)\n  ACERTOU trava-fora-da-pasta     0.1 s  2 rodada(s)\n  ERROU   raciocinio              0.1 s  1 rodada(s)  ← a resposta não tem '51'\n\nmock/mock: acertou 7 de 8 (88%) · 0.1 s por tarefa · 2.1 rodadas por tarefa · 0 tokens\ngravado: ~/.intelecto2/avaliacoes/2026-11-14T06_25_28-mock_mock.json  (compare com `python3 -m intelecto avaliar --comparar`)</pre><p>O cérebro de teste (o \"mock\", um modelo de mentira que segue um roteiro fixo) não faz conta: a medição mostra o erro. Com o Ollama, troque <code>--provedor mock --modelo mock</code> por <code>--provedor ollama --modelo llama3.2</code>.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Teste o que aprendeu",
+      "sub": "A explicação aparece depois da sua resposta.",
+      "perguntas": [
+        {
+          "p": "A mudança B parecia boa ideia e a nota caiu de 5 para 4. O que fazer?",
+          "opcoes": [
+            "git restore, voltando ao estado salvo antes da mudança.",
+            "Manter, porque a ideia era boa.",
+            "Mudar mais duas coisas para compensar.",
+            "Rodar a medição até sair 5."
+          ],
+          "certa": 0,
+          "explica": "Número caiu, mudança sai. Rodar até sair o número que você quer é se enganar.",
+          "ref": "passos"
+        },
+        {
+          "p": "Por que mudar uma coisa de cada vez?",
+          "opcoes": [
+            "Porque o Git só consegue guardar uma mudança por commit.",
+            "Porque o medir.py só aceita uma alteração por vez.",
+            "Para saber qual mudança causou o efeito.",
+            "Para gastar menos tokens em cada medição nova."
+          ],
+          "certa": 2,
+          "explica": "Duas mudanças juntas e a nota sobe: foi a primeira, a segunda, ou uma ajudou e a outra atrapalhou? Uma por vez responde.",
+          "ref": "diagrama"
+        },
+        {
+          "p": "O modelo maior resolveu o erro. Isso quer dizer que você deve sempre usar o maior?",
+          "opcoes": [
+            "Sim, o maior é sempre melhor em qualquer tarefa e máquina.",
+            "Não: custa mais máquina; decida pela medição.",
+            "Não: modelo grande sempre erra mais que o pequeno.",
+            "Sim, porque o modelo pequeno não sabe usar ferramentas."
+          ],
+          "certa": 1,
+          "explica": "O llama3.2 acertou 5 de 6 em menos de 1 s por tarefa, com 2 GB. Se o seu objetivo não precisa da sexta, ele serve. A medição mostra o preço de cada escolha.",
+          "ref": "passos"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "Resumo do curso",
+      "itens": [
+        {
+          "t": "Decidir",
+          "texto": "Objetivo com número, harness, depois o modelo."
+        },
+        {
+          "t": "Construir",
+          "texto": "Ferramentas, instruções e memória em 87 linhas."
+        },
+        {
+          "t": "Proteger",
+          "texto": "Freio, pasta única e o seu OK, no código."
+        },
+        {
+          "t": "Provar",
+          "texto": "Medir, mudar uma coisa, medir de novo, decidir."
+        }
+      ]
+    },
+    {
+      "tipo": "links",
+      "titulo": "Para ir além",
+      "links": [
+        {
+          "t": "INTELECTO v2: guia do assistente completo",
+          "href": "https://inematds.github.io/intelecto-v2/guia/",
+          "icone": "robo"
+        },
+        {
+          "t": "Curso: seu Jarvis seguro com o INTELECTO v2",
+          "href": "https://inematds.github.io/intelecto-v2-curso/",
+          "icone": "lista"
+        },
+        {
+          "t": "A mercearia: escolha peças e gere o seu meu-assistente.md",
+          "href": "https://inematds.github.io/intelecto-v2/guia/mercearia/",
+          "icone": "camadas"
+        },
+        {
+          "t": "Kit deste curso no GitHub",
+          "href": "https://github.com/inematds/agentes-do-zero-v72/tree/main/kit",
+          "icone": "git"
+        }
+      ]
+    }
+  ]
+}

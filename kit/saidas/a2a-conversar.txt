@@ -1,0 +1,4 @@
+Um agente de IA é um programa de computador que pode tomar ações autônomas com base em regras e objetivos definidos, simulando a capacidade de tomada de decisão humana.
+(modelo llama3.2)
+Um agente de IA é um sistema que pode tomar decisões e agir em um ambiente, com o objetivo de alcançar um objetivo específico, utilizando aprendizado de máquina e inteligência artificial.
+(modelo llama3.1:8b)

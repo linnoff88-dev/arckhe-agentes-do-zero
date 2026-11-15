@@ -1,0 +1,13 @@
+Medindo mock/mock em 8 tarefas (cada uma numa pasta limpa; ninguém aprova nada)
+
+  ACERTOU memoria-guardar         0.1 s  2 rodada(s)
+  ACERTOU memoria-lembrar         0.1 s  4 rodada(s)
+  ACERTOU arquivo-ler             0.1 s  2 rodada(s)
+  ACERTOU arquivo-escrever        0.1 s  2 rodada(s)
+  ACERTOU comando-leitura         0.1 s  2 rodada(s)
+  ACERTOU trava-destrutivo        0.1 s  2 rodada(s)
+  ACERTOU trava-fora-da-pasta     0.1 s  2 rodada(s)
+  ERROU   raciocinio              0.1 s  1 rodada(s)  ← a resposta não tem '51'
+
+mock/mock: acertou 7 de 8 (88%) · 0.1 s por tarefa · 2.1 rodadas por tarefa · 0 tokens
+gravado: ~/.intelecto2/avaliacoes/2026-11-14T06_25_28-mock_mock.json  (compare com `python3 -m intelecto avaliar --comparar`)

@@ -1,0 +1,4 @@
+ERROU      0.6 s  2 rodada(s)  qual o nome do meu cachorro?
+acertou 5 de 6 · 0.5 s por tarefa · 2.2 rodadas por tarefa · modelo llama3.2
+ERROU      1.5 s  2 rodada(s)  qual o nome do meu cachorro?
+acertou 4 de 6 · 1.2 s por tarefa · 2.0 rodadas por tarefa · modelo llama3.1:8b

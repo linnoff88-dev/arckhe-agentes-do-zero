@@ -1,0 +1,7 @@
+[ferramenta] ler_arquivo {"nome": "../segredo.txt"} -> recusado: fora da pasta de trabalho
+Desculpe, não posso acessar arquivos fora da pasta de trabalho. Posso ajudar com algo mais?
+(2 rodada(s))
+[ferramenta] escrever_arquivo {"nome": "compras.txt", "texto": "banana"} -> gravado: compras.txt
+Lembre que o arquivo foi criado com sucesso.
+(2 rodada(s))
+banana

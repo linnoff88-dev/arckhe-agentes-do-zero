@@ -1,0 +1,200 @@
+{
+  "slug": "harness-modelo",
+  "num": 2,
+  "menu": "Harness",
+  "titulo": "Harness e modelo: o agente começa a conversar",
+  "titulo_curto": "Harness e modelo",
+  "minutos": 12,
+  "lead": "O harness é o programa em volta do modelo. Nesta aula ele tem 19 linhas: pega o seu pedido, manda ao Ollama e imprime a resposta. Ainda não é agente, mas já mostra a separação que importa: trocar o modelo é mudar uma variável, não reescrever o programa.",
+  "objetivo": "rodar o primeiro agente.py e trocar o modelo pela variável MODELO sem mexer no código.",
+  "competencias": [
+    "separar-harness-modelo",
+    "chamar-modelo-local",
+    "trocar-modelo"
+  ],
+  "aprende": [
+    {
+      "t": "O que o harness faz e o que o modelo faz"
+    },
+    {
+      "t": "Chamar o Ollama com Python puro"
+    },
+    {
+      "t": "Trocar de modelo com uma variável"
+    }
+  ],
+  "hero_alt": "Cabeça de robô humanoide presa numa estrutura de metal com cabos ligados a um painel.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "O caminho do seu pedido",
+      "sub": "Clique em cada etapa.",
+      "nos": [
+        {
+          "icone": "usuario",
+          "titulo": "Pedido",
+          "sub": "No terminal",
+          "detalhe": "Você roda <code>python3 agente.py \"sua pergunta\"</code>. Tudo depois do nome do arquivo vira o pedido."
+        },
+        {
+          "icone": "terminal",
+          "titulo": "Harness",
+          "sub": "agente.py",
+          "forte": true,
+          "detalhe": "Monta a mensagem (quem fala + o texto), manda ao Ollama e imprime a resposta. A <b>temperatura</b> diz quanto o modelo sorteia palavras; em 0, ele escolhe sempre a mais provável. A <b>semente</b> fixa o sorteio que sobra. Assim a mesma pergunta tende a dar a mesma resposta, o que ajuda a medir depois."
+        },
+        {
+          "icone": "chip",
+          "titulo": "Ollama",
+          "sub": "localhost:11434",
+          "detalhe": "O Ollama é o programa que roda modelos no seu computador e atende pedidos no endereço <code>localhost:11434</code>, como um site local. O pedido vai por <b>HTTP</b> (o mesmo jeito que o navegador fala com um site) em <b>JSON</b> (texto organizado em campos, como <code>\"model\": \"llama3.2\"</code>)."
+        },
+        {
+          "icone": "cerebro",
+          "titulo": "Modelo",
+          "sub": "MODELO=llama3.2",
+          "detalhe": "O modelo é uma peça trocável. <code>MODELO=llama3.1:8b python3 agente.py ...</code> usa outro sem mudar uma linha do código."
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "O agente.py da aula 2",
+      "sub": "Rode dentro de agente-do-zero/. O primeiro comando copia o arquivo da aula do kit para a sua pasta.",
+      "blocos": [
+        {
+          "rot": "Arquivo · kit/aula2/agente.py",
+          "icone": "arquivo",
+          "conteudo": "#!/usr/bin/env python3\n\"\"\"Agente do zero (aula 2): o harness mais simples, que leva o seu pedido ao modelo e devolve a resposta.\"\"\"\nimport json, os, sys, urllib.request\n\nMODELO = os.environ.get(\"MODELO\", \"llama3.2\")\nURL = os.environ.get(\"OLLAMA_URL\", \"http://localhost:11434\") + \"/api/chat\"\n\n\ndef cerebro(mensagens):\n    corpo = {\"model\": MODELO, \"messages\": mensagens, \"stream\": False, \"think\": False, \"options\": {\"temperature\": 0, \"seed\": 1}}\n    pedido = urllib.request.Request(URL, json.dumps(corpo).encode(), {\"Content-Type\": \"application/json\"})\n    with urllib.request.urlopen(pedido, timeout=600) as r:\n        return json.loads(r.read())[\"message\"]\n\n\nif __name__ == \"__main__\":\n    pedido = \" \".join(sys.argv[1:])\n    resposta = cerebro([{\"role\": \"user\", \"content\": pedido}])\n    print(f\"{resposta['content']}\\n(modelo {MODELO})\")"
+        },
+        {
+          "rot": "Terminal · copiar, conversar e trocar o modelo",
+          "icone": "terminal",
+          "conteudo": "cd ~/agente-do-zero\ncp ~/agentes-do-zero-v72/kit/aula2/agente.py .\npython3 agente.py \"Explique em uma frase o que é um agente de IA.\"\nollama list | grep -q \"^llama3.1:8b\" || ollama pull llama3.1:8b   # 5 GB, uma vez só: o download mostra o progresso\nMODELO=llama3.1:8b python3 agente.py \"Explique em uma frase o que é um agente de IA.\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Saída capturada (14/11/2026)",
+            "html": "<pre>Um agente de IA é um programa de computador que pode tomar ações autônomas com base em regras e objetivos definidos, simulando a capacidade de tomada de decisão humana.\n(modelo llama3.2)\nUm agente de IA é um sistema que pode tomar decisões e agir em um ambiente, com o objetivo de alcançar um objetivo específico, utilizando aprendizado de máquina e inteligência artificial.\n(modelo llama3.1:8b)</pre><p>Mesmo pedido, dois modelos, nenhuma linha de código mudou. A linha do <code>ollama pull</code> baixa o <code>llama3.1:8b</code> (5 GB) só se ele ainda não estiver na máquina. Se der erro de memória no seu notebook, pule a última linha e use o modelo pequeno do E2.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "passos",
+      "titulo": "O que cada parte do arquivo faz",
+      "sub": "Clique em cada parte.",
+      "passos": [
+        {
+          "titulo": "Configuração",
+          "sub": "MODELO e URL",
+          "texto": [
+            "As duas primeiras variáveis leem o ambiente: se você não disser nada, vale <code>llama3.2</code> no Ollama local.",
+            "Trocar de modelo ou de servidor é mudar a variável, nunca o código."
+          ]
+        },
+        {
+          "titulo": "cerebro()",
+          "sub": "A chamada",
+          "texto": [
+            "Monta o corpo do pedido em JSON, envia por HTTP com a biblioteca padrão (<code>urllib</code>) e devolve a mensagem do modelo.",
+            "<code>\"think\": False</code> desliga o modo \"pensar em voz alta\" de modelos como o qwen3, que deixava a resposta lenta."
+          ]
+        },
+        {
+          "titulo": "Principal",
+          "sub": "O que roda",
+          "texto": [
+            "Junta as palavras do terminal num pedido, chama o <code>cerebro()</code> uma vez e imprime.",
+            "Uma ida e uma volta: ainda não tem ferramenta nem loop. Isso entra na aula 3."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Prática: o primeiro harness",
+      "sub": "Faça na ordem.",
+      "exercicios": [
+        {
+          "id": "e1",
+          "titulo": "E1 · A primeira resposta",
+          "min": "10 min",
+          "texto": "Rode o bloco do terminal e depois faça uma pergunta sua com <code>python3 agente.py \"sua pergunta\"</code>.",
+          "pronto": "o terminal mostra a resposta e, na última linha, <code>(modelo llama3.2)</code>."
+        },
+        {
+          "id": "e2",
+          "titulo": "E2 · Outro cérebro, mesmo programa",
+          "min": "10 min",
+          "texto": "Baixe um modelo pequeno (<code>ollama pull llama3.2:1b</code>, 1,3 GB) e repita a pergunta com <code>MODELO=llama3.2:1b</code> na frente. Se o 5 GB ficou lento demais no seu notebook, este é o que você vai querer.",
+          "pronto": "a última linha mostra o nome do outro modelo e o agente.py não foi alterado."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Teste o que aprendeu",
+      "sub": "A explicação aparece depois da sua resposta.",
+      "perguntas": [
+        {
+          "p": "Você quer testar outro modelo. O que muda?",
+          "opcoes": [
+            "O agente.py inteiro, para o novo modelo.",
+            "A função cerebro(), que é diferente por modelo.",
+            "Só a variável MODELO na hora de rodar.",
+            "Nada: o Ollama escolhe sozinho o melhor."
+          ],
+          "certa": 2,
+          "explica": "O harness não sabe nem quer saber qual modelo está do outro lado. Por isso trocar é barato, e medir (aula 6) diz se valeu a pena.",
+          "ref": "codigo"
+        },
+        {
+          "p": "Por que temperatura 0 e semente fixa?",
+          "opcoes": [
+            "Para a mesma pergunta dar a mesma resposta e medir ser justo.",
+            "Para o modelo ficar mais criativo e variar as respostas.",
+            "Porque o Ollama exige esses valores em toda chamada de API.",
+            "Para gastar menos memória de vídeo durante a conversa."
+          ],
+          "certa": 0,
+          "explica": "Com sorteio ligado, cada rodada sai diferente e você não sabe se a mudança melhorou ou foi sorte. Repetível primeiro, criativo depois.",
+          "ref": "diagrama"
+        },
+        {
+          "p": "Esta versão do agente.py ainda não é um agente de verdade. O que falta?",
+          "opcoes": [
+            "Uma interface gráfica com janelas e botões para conversar.",
+            "Um modelo pago na nuvem, mais forte que o local.",
+            "Mais linhas de configuração no começo do arquivo.",
+            "Ferramentas e o loop que executa os pedidos."
+          ],
+          "certa": 3,
+          "explica": "Uma ida e uma volta é um chat. Agente é quando o modelo pode pedir ação e o programa executa, em voltas, até terminar.",
+          "ref": "passos"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "Resumo da aula",
+      "itens": [
+        {
+          "t": "Harness",
+          "texto": "O programa em volta: monta, chama, imprime. É seu."
+        },
+        {
+          "t": "Modelo",
+          "texto": "Peça trocável, escolhida pela variável MODELO."
+        },
+        {
+          "t": "Repetível",
+          "texto": "Temperatura 0 e semente fixa para poder medir."
+        }
+      ]
+    }
+  ]
+}

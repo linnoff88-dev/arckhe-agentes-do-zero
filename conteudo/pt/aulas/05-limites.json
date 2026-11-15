@@ -1,0 +1,172 @@
+{
+  "slug": "limites",
+  "num": 5,
+  "menu": "Limites",
+  "titulo": "Limites: o freio, a pasta e o seu OK",
+  "titulo_curto": "Limites",
+  "minutos": 15,
+  "lead": "Um agente com ferramenta faz o que um texto mandar, inclusive um texto mal-intencionado. Antes de dar a ele o poder de gravar, você vai ver o furo da versão anterior com os próprios olhos e fechar com duas travas novas no harness, onde o modelo não consegue mexer, além do freio que já existe desde a aula 3.",
+  "objetivo": "ver o agente da aula 4 ler um segredo fora da pasta e fechar o furo com a pasta única e o OK antes de substituir.",
+  "competencias": [
+    "confinar-pasta",
+    "exigir-aprovacao",
+    "limitar-rodadas"
+  ],
+  "aprende": [
+    {
+      "t": "Como um pedido sai da pasta com ../"
+    },
+    {
+      "t": "As três travas e por que ficam no código"
+    },
+    {
+      "t": "Gravar arquivo com o seu OK"
+    }
+  ],
+  "hero_alt": "Portão de ferro fechado com cadeado diante de uma área de trabalho organizada.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "As três travas",
+      "sub": "Clique em cada uma. Todas estão no harness: o modelo pede, o código decide.",
+      "nos": [
+        {
+          "icone": "relogio",
+          "titulo": "Freio",
+          "sub": "Desde a aula 3",
+          "detalhe": "No máximo 5 idas ao modelo por pedido. Se ele ficar pedindo ferramenta em círculo, o agente para e avisa."
+        },
+        {
+          "icone": "pasta",
+          "titulo": "Pasta única",
+          "sub": "dentro()",
+          "forte": true,
+          "detalhe": "Todo caminho passa por <code>dentro()</code>, que resolve o caminho real e recusa o que cair fora de <code>trabalho/</code>. \"../segredo.txt\" vira \"recusado: fora da pasta de trabalho\"."
+        },
+        {
+          "icone": "check",
+          "titulo": "Seu OK",
+          "sub": "substituir? [s/N]",
+          "detalhe": "Gravar arquivo novo é livre. Substituir um que já existe pergunta no terminal; sem terminal (num script), a resposta é não."
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "Primeiro o furo, depois a trava",
+      "sub": "O primeiro bloco usa o agente da aula 4, que ainda está na pasta. O segundo copia o da aula 5 e repete o pedido.",
+      "blocos": [
+        {
+          "rot": "Terminal · o furo (agente da aula 4)",
+          "icone": "terminal",
+          "conteudo": "cd ~/agente-do-zero\necho \"senha do banco: 1234\" > segredo.txt      # fora de trabalho/: o agente não devia ler\npython3 agente.py \"leia o arquivo ../segredo.txt\""
+        },
+        {
+          "rot": "Arquivo · kit/aula5/agente.py",
+          "icone": "arquivo",
+          "conteudo": "#!/usr/bin/env python3\n\"\"\"Agente do zero (aula 5): modelo + loop + ferramentas + instruções + memória + limites.\"\"\"\nimport json, os, sys, urllib.request\n\nMODELO = os.environ.get(\"MODELO\", \"llama3.2\")\nURL = os.environ.get(\"OLLAMA_URL\", \"http://localhost:11434\") + \"/api/chat\"\nPASTA = os.path.realpath(\"trabalho\")      # a única pasta que o agente enxerga\nMEMORIA = \"memoria.json\"\nMAX_RODADAS = 5                           # o freio: no máximo 5 idas ao modelo por pedido\n\n\ndef cerebro(mensagens, ferramentas):\n    corpo = {\"model\": MODELO, \"messages\": mensagens, \"tools\": ferramentas, \"stream\": False, \"think\": False,\n             \"options\": {\"temperature\": 0, \"seed\": 1}}\n    pedido = urllib.request.Request(URL, json.dumps(corpo).encode(), {\"Content-Type\": \"application/json\"})\n    with urllib.request.urlopen(pedido, timeout=600) as r:\n        return json.loads(r.read())[\"message\"]\n\n\ndef dentro(nome):\n    caminho = os.path.realpath(os.path.join(PASTA, nome))\n    if not caminho.startswith(PASTA + os.sep):\n        raise ValueError(\"fora da pasta de trabalho\")\n    return caminho\n\n\ndef memorias():\n    return json.load(open(MEMORIA)) if os.path.exists(MEMORIA) else []\n\n\ndef ler_arquivo(nome):\n    with open(dentro(nome)) as f:\n        return f.read()\n\n\ndef escrever_arquivo(nome, texto):\n    caminho = dentro(nome)\n    if os.path.exists(caminho):           # mexer no que já existe pede OK (sem terminal = não)\n        if not sys.stdin.isatty() or input(f\"  substituir {nome}? [s/N] \").lower() != \"s\":\n            return \"recusado: o dono não aprovou\"\n    with open(caminho, \"w\") as f:\n        f.write(texto)\n    return f\"gravado: {nome}\"\n\n\ndef lembrar(fato):\n    json.dump(memorias() + [fato], open(MEMORIA, \"w\"), ensure_ascii=False)\n    return f\"guardado: {fato}\"\n\n\nFERRAMENTAS = {\"ler_arquivo\": ler_arquivo, \"escrever_arquivo\": escrever_arquivo, \"lembrar\": lembrar}\nDESCRICOES = [\n    {\"type\": \"function\", \"function\": {\"name\": \"ler_arquivo\", \"description\": \"Lê um arquivo da pasta de trabalho.\",\n     \"parameters\": {\"type\": \"object\", \"properties\": {\"nome\": {\"type\": \"string\"}}, \"required\": [\"nome\"]}}},\n    {\"type\": \"function\", \"function\": {\"name\": \"escrever_arquivo\", \"description\": \"Grava um arquivo na pasta de trabalho.\",\n     \"parameters\": {\"type\": \"object\", \"properties\": {\"nome\": {\"type\": \"string\"}, \"texto\": {\"type\": \"string\"}},\n                    \"required\": [\"nome\", \"texto\"]}}},\n    {\"type\": \"function\", \"function\": {\"name\": \"lembrar\", \"description\": \"Guarda um fato sobre o dono para sempre.\",\n     \"parameters\": {\"type\": \"object\", \"properties\": {\"fato\": {\"type\": \"string\"}}, \"required\": [\"fato\"]}}},\n]\n\n\ndef responder(pedido, mostrar=print):\n    instrucoes = open(\"instrucoes.md\").read()\n    lembrancas = \"\\n\".join(f\"- {m}\" for m in memorias()) or \"(nada ainda)\"\n    mensagens = [{\"role\": \"system\", \"content\": f\"{instrucoes}\\n\\nO que você sabe do dono:\\n{lembrancas}\"},\n                 {\"role\": \"user\", \"content\": pedido}]\n    for rodada in range(MAX_RODADAS):\n        msg = cerebro(mensagens, DESCRICOES)\n        mensagens.append(msg)\n        if not msg.get(\"tool_calls\"):\n            return msg.get(\"content\", \"\"), rodada + 1\n        for chamada in msg[\"tool_calls\"]:\n            nome, args = chamada[\"function\"][\"name\"], chamada[\"function\"].get(\"arguments\") or {}\n            try:\n                saida = FERRAMENTAS[nome](**args)\n            except Exception as erro:              # ferramenta errada, arquivo que não existe, fora da pasta\n                saida = f\"recusado: {erro}\"\n            mostrar(f\"[ferramenta] {nome} {json.dumps(args, ensure_ascii=False)} -> {saida[:80]}\")\n            mensagens.append({\"role\": \"tool\", \"content\": saida})\n    return \"Parei: cheguei ao limite de rodadas.\", MAX_RODADAS\n\n\nif __name__ == \"__main__\":\n    os.makedirs(PASTA, exist_ok=True)\n    resposta, rodadas = responder(\" \".join(sys.argv[1:]))\n    print(f\"{resposta}\\n({rodadas} rodada(s))\")"
+        },
+        {
+          "rot": "Terminal · a trava (agente da aula 5)",
+          "icone": "terminal",
+          "conteudo": "cd ~/agente-do-zero\ncp ~/agentes-do-zero-v72/kit/aula5/agente.py .\npython3 agente.py \"leia o arquivo ../segredo.txt\"\npython3 agente.py \"crie o arquivo compras.txt com a palavra banana\"\ncat trabalho/compras.txt; echo"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "O furo (14/11/2026)",
+            "html": "<pre>[ferramenta] ler_arquivo {\"nome\": \"../segredo.txt\"} -&gt; senha do banco: 1234\n\nDesculpe, não posso acessar ou ler arquivos que contenham informações sensíveis, como senhas de bancos. Se você precisar acessar essa informação, recomendo que você entre em contato com o suporte do banco ou com o dono da informação.\n\nSe você quiser ler um arquivo diferente, posso tentar ajudar. Por favor, forneça mais informações sobre o arquivo que você deseja ler.\n(2 rodada(s))</pre><p>O agente da aula 4 leu o segredo.txt, fora da pasta de trabalho, e a senha foi parar no modelo (linha <code>[ferramenta]</code>). Desta vez o modelo não repetiu a senha, mas ela já tinha saído. Quem barra é o programa, não a boa vontade do modelo. A senha aqui é de mentira.</p>"
+          },
+          {
+            "rot": "A trava (14/11/2026)",
+            "html": "<pre>[ferramenta] ler_arquivo {\"nome\": \"../segredo.txt\"} -&gt; recusado: fora da pasta de trabalho\nDesculpe, não posso acessar arquivos fora da pasta de trabalho. Posso ajudar com algo mais?\n(2 rodada(s))\n[ferramenta] escrever_arquivo {\"nome\": \"compras.txt\", \"texto\": \"banana\"} -&gt; gravado: compras.txt\nLembre que o arquivo foi criado com sucesso.\n(2 rodada(s))\nbanana</pre><p>Mesmo pedido, agora recusado pelo código. E a ferramenta nova, escrever_arquivo, gravou o compras.txt dentro da pasta.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Prática: feche o furo",
+      "sub": "Faça na ordem.",
+      "exercicios": [
+        {
+          "id": "e1",
+          "titulo": "E1 · Veja e feche",
+          "min": "10 min",
+          "texto": "Rode o bloco do furo (com o agente da aula 4) e depois o da trava (que copia o da aula 5).",
+          "pronto": "na primeira saída aparece <code>senha do banco: 1234</code>; na segunda, <code>recusado: fora da pasta de trabalho</code>."
+        },
+        {
+          "id": "e2",
+          "titulo": "E2 · O seu OK",
+          "min": "10 min",
+          "texto": "Com o compras.txt já criado, peça para gravar de novo com outra palavra e responda N.",
+          "pronto": "o terminal perguntou <code>substituir compras.txt? [s/N]</code> e o arquivo continua com a palavra antiga."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Teste o que aprendeu",
+      "sub": "A explicação aparece depois da sua resposta.",
+      "perguntas": [
+        {
+          "p": "Por que a trava da pasta fica no código e não nas instruções?",
+          "opcoes": [
+            "Porque instrução no arquivo custa mais caro a cada chamada.",
+            "O modelo pode ser convencido por um texto; o código não.",
+            "Porque o instrucoes.md não aceita regras de segurança.",
+            "Porque o Ollama ignora a mensagem de sistema quando tem ferramenta."
+          ],
+          "certa": 1,
+          "explica": "\"Não leia fora da pasta\" nas instruções é um pedido. <code>dentro()</code> no código é uma parede. Segurança vai na parede.",
+          "ref": "diagrama"
+        },
+        {
+          "p": "O que acontece se o modelo pedir para substituir um arquivo e o agente estiver rodando num script, sem ninguém no terminal?",
+          "opcoes": [
+            "Recusa: sem terminal, a resposta é não.",
+            "Substitui, porque ninguém disse não.",
+            "Espera para sempre por uma resposta.",
+            "Grava uma cópia com outro nome."
+          ],
+          "certa": 0,
+          "explica": "Sem pessoa para aprovar, o padrão seguro é negar. Por isso o medir.py da aula 6 nunca substitui nada.",
+          "ref": "diagrama"
+        },
+        {
+          "p": "Para que serve o MAX_RODADAS?",
+          "opcoes": [
+            "Para limitar o tamanho de cada resposta do modelo.",
+            "Para escolher sozinho o modelo mais rápido disponível.",
+            "Para parar o modelo que pede ferramenta sem fim.",
+            "Para contar quantos arquivos o agente leu no pedido."
+          ],
+          "certa": 2,
+          "explica": "Cada rodada é uma chamada ao modelo. Sem teto, um modelo confuso gira até você matar o processo.",
+          "ref": "diagrama"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "Resumo da aula",
+      "itens": [
+        {
+          "t": "Furo",
+          "texto": "Sem trava, \"../\" leva o agente para fora da pasta."
+        },
+        {
+          "t": "Travas",
+          "texto": "Freio, pasta única e OK do dono, todas no código."
+        },
+        {
+          "t": "Padrão seguro",
+          "texto": "Sem ninguém para aprovar, a resposta é não."
+        }
+      ]
+    }
+  ]
+}
